@@ -12,8 +12,15 @@ public class TimeManager : MonoBehaviour
         get { return elapsedTime; }
     }
 
-    public delegate void TimeStoppedDelegate();
-    public event TimeStoppedDelegate OnTimeStopped;
+    private void OnEnable()
+    {
+        PlayerCollider.OnFinishReached += StopTimer;
+    }
+
+    private void OnDisable()
+    {
+        PlayerCollider.OnFinishReached -= StopTimer;
+    }
 
     void Update()
     {
@@ -29,6 +36,5 @@ public class TimeManager : MonoBehaviour
     public void StopTimer()
     {
         timerRunning = false;
-        OnTimeStopped?.Invoke();
     }
 }

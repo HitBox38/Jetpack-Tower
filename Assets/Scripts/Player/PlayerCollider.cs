@@ -1,23 +1,22 @@
-using System.Collections;
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 
 public class PlayerCollider : MonoBehaviour
 {
-    [SerializeField] private ScoreManager scoreManager;
-    [SerializeField] private TimeManager timeManager;
     [SerializeField] private Transform collectibles;
     [SerializeField] private GameObject endTrigger;
-    [SerializeField] private TMP_Text endText;
-    [SerializeField] private TMP_Text dropText;
-    [SerializeField] private float timeUntilGone = 3f;
+
+    public static event Action<float> OnRingCollect;
+    public static event Action OnTopReached;
+    public static event Action OnFinishReached;
 
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Collectible"))
         {
-            scoreManager.AddScore(10);
+            OnRingCollect?.Invoke(10);
             Destroy(other.gameObject);
         }
         if (other.CompareTag("Trap"))
@@ -28,14 +27,11 @@ public class PlayerCollider : MonoBehaviour
         {
             EnableChildrenInGameObject(collectibles);
             endTrigger.SetActive(true);
-            StartCoroutine(ShowDropTextAndHide(timeUntilGone));
+            OnTopReached?.Invoke();
         }
         if (other.CompareTag("Finish"))
         {
-            Debug.Log("finished");
-            timeManager.StopTimer();
-            endText.enabled = true;
-            endText.text = "Score: " + scoreManager.CurrentScore + "<br>Time: " + (string.Format("{0:00}:{1:00}", (int)(timeManager.ElapsedTime / 60), (int)(timeManager.ElapsedTime % 60)));
+            OnFinishReached?.Invoke();
         }
     }
 
@@ -50,10 +46,5 @@ public class PlayerCollider : MonoBehaviour
         }
     }
 
-    IEnumerator ShowDropTextAndHide(float duration)
-    {
-        dropText.enabled = true;
-        yield return new WaitForSeconds(duration);
-        dropText.enabled = false;
-    }
+
 }

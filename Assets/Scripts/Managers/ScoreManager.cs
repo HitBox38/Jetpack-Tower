@@ -1,25 +1,35 @@
+using System;
 using UnityEngine;
 using TMPro;
 
 public class ScoreManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text scoreText;
-    private int currentScore = 0;
+    private float currentScore = 0;
 
-    public int CurrentScore
+    public float CurrentScore
     {
         get { return currentScore; }
     }
 
-    public delegate void ScoreChangedDelegate(int newScore);
-    public event ScoreChangedDelegate OnScoreChanged;
+    public static event Action<float> OnScoreChanged;
+
+    private void OnEnable()
+    {
+        PlayerCollider.OnRingCollect += AddScore;
+    }
+
+    private void OnDisable()
+    {
+        PlayerCollider.OnRingCollect -= AddScore;
+    }
 
     void Update()
     {
         scoreText.text = currentScore.ToString();
     }
 
-    public void AddScore(int points)
+    public void AddScore(float points)
     {
         currentScore += points;
         OnScoreChanged?.Invoke(currentScore);
